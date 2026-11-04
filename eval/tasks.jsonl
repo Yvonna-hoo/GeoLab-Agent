@@ -1,0 +1,18 @@
+{"id": "T01", "text": "在其他条件不变时，植被覆盖变化会怎样影响土壤流失估算？", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-decrease:soil_loss_t_ha_yr", "headline-monotonic"], "note": "任务A：单因子关系，覆盖度上升流失量必须下降"}
+{"id": "T02", "text": "弯曲河道的哪些部位更容易发生侵蚀或沉积？", "experiment": "river_bend_erosion", "intent": "run", "checks": ["headline:凹岸", "headline:凸岸"], "note": "任务B：部位判断，结论必须同时提到两岸"}
+{"id": "T03", "text": "同一块坡地，改成梯田或退耕还林之后，土壤流失量能减少多少？请做对照。", "experiment": "soil_erosion_rusle", "intent": "compare", "checks": ["delta-negative"], "note": "任务C：措施对照，所有措施都应减少流失"}
+{"id": "T04", "text": "对这块坡地的土壤流失来说，覆盖度和坡度哪个因子影响最大？请做敏感性分析。", "experiment": "soil_erosion_rusle", "intent": "analyze", "checks": ["ranked"], "note": "任务D：因子排序"}
+{"id": "T05", "text": "河宽不变的情况下，弯道半径变小，凹岸的冲刷会变成什么样？", "experiment": "river_bend_erosion", "intent": "sweep", "checks": ["trend-decrease:stress_exceed_ratio"], "note": "任务E：半径增大则冲刷减弱，趋势必须单调下降"}
+{"id": "T06", "text": "坡面产生的泥沙与河流的搬运、沉积有什么联系？", "experiment": null, "intent": "cross_module", "checks": ["no-exec"], "note": "任务F：跨模块只做概念串联，禁止数值合并"}
+{"id": "T07", "text": "把植被覆盖度设成 130%，看看土壤流失量是多少。", "experiment": "soil_erosion_rusle", "intent": "run", "checks": ["exec-error", "precheck"], "note": "任务G：越界参数必须被拦下，不能被绕过或猜一个"}
+{"id": "T08", "text": "坡度从 3% 增加到 25%，土壤流失量会增加多少？", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-increase:soil_loss_t_ha_yr"], "note": "坡度上升流失量必须上升"}
+{"id": "T09", "text": "如果河道流速变大，凹岸的冲刷风险会怎样变化？", "experiment": "river_bend_erosion", "intent": "sweep", "checks": ["trend-increase:stress_exceed_ratio"], "note": "τ∝v²，冲刷风险单调上升"}
+{"id": "T10", "text": "砂岸和黏土岸在同样的水流条件下，冲刷风险差别有多大？请做对照。", "experiment": "river_bend_erosion", "intent": "compare", "checks": ["delta-extremes"], "note": "换材质时主指标必须大幅变化：砂岸 τc=2、基岩 τc=80"}
+{"id": "T11", "text": "坡长从 10 米延长到 100 米，土壤流失量会怎样变化？", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-increase:soil_loss_t_ha_yr"], "note": "L=(λ/22.13)^m，坡长增加流失量应次线性上升"}
+{"id": "T12", "text": "降雨侵蚀力从 2000 增加到 6000，土壤流失量怎么变？", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-increase:soil_loss_t_ha_yr"], "note": "R 与 A 线性相关"}
+{"id": "T13", "text": "帮我写一首关于春天的小诗。", "experiment": null, "intent": null, "checks": ["route-refused"], "note": "无关问题必须拒绝并追问，不能硬套一个实验"}
+{"id": "T14", "text": "坡度 15%、坡长 80 米的坡耕地，水土流失有多严重？", "experiment": "soil_erosion_rusle", "intent": "run", "checks": ["headline:t/(ha·a)"], "note": "显式参数抽取 + 单次估算"}
+{"id": "T15", "text": "退耕还林和等高耕作相比，哪个保土效果更好？", "experiment": "soil_erosion_rusle", "intent": "compare", "checks": ["delta-negative"], "note": "两种措施对比"}
+{"id": "T16", "text": "弯道转角从 30 度变到 180 度，最大冲刷部位会怎么移动？", "experiment": "river_bend_erosion", "intent": "sweep", "checks": ["trend-increase:stress_exceed_ratio"], "note": "转角变大，环流发展距离更长，主指标上升"}
+{"id": "T17", "text": "河宽 30 米、半径 60 米的急弯，凹岸剪应力和岸坡起动条件相比如何？", "experiment": "river_bend_erosion", "intent": "run", "checks": ["headline:Pa"], "note": "显式参数 + 起动条件判断，结论必须落到 Pa 量级"}
+{"id": "T18", "text": "植被覆盖度对水土流失的影响是不是线性的？请用数据说明。", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-decrease:soil_loss_t_ha_yr"], "note": "必须给出曲线数据，而不是空口宣称指数关系"}

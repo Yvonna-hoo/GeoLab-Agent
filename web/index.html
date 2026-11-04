@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoLab Agent · 地理科学虚拟实验智能体</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="bar">
+    <button class="brand" id="homeLink" title="回到首页">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="12" cy="12" r="8.2"/>
+          <path d="M3.8 12h16.4M12 3.8c2.6 2.4 4 5.4 4 8.2s-1.4 5.8-4 8.2c-2.6-2.4-4-5.1-4-8.2s1.4-5.8 4-8.2z"/>
+        </svg>
+      </span>
+      <span class="name">GeoLab Agent</span>
+    </button>
+    <span class="bar-note" id="barNote">地理科学虚拟实验智能体</span>
+  </header>
+
+  <main class="scroll" id="scroll">
+
+    <section class="view" id="landing">
+      <h1 class="hero">今天想探究什么？</h1>
+      <p class="hero-sub">描述一个地理问题，GeoLab 会设计对照实验、调用计算工具，给出带适用边界的解释。</p>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <section class="view hidden" id="result"></section>
+
+  </main>
+
+  <footer class="composer-wrap">
+    <form class="composer" id="composer" autocomplete="off">
+      <textarea id="taskInput" rows="1" placeholder="向 GeoLab 提问，例如：植被覆盖变化怎样影响土壤流失？"></textarea>
+      <button type="submit" class="send" id="sendBtn" title="发送" aria-label="发送">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+      </button>
+    </form>
+    <div class="composer-hint">Enter 发送，Shift + Enter 换行 · 计算结果为教学示例估算</div>
+  </footer>
+
+</div>
+
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

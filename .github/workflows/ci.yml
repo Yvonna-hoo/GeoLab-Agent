@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: 单元测试 + 任务回归
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # 本项目零第三方依赖，故意不装任何包：
+      # 这一步本身就是「克隆下来就能跑」的验证。
+      - name: 确认没有第三方依赖
+        run: python -c "import geolab, geolab.service, geolab.agent.router; print('import ok')"
+
+      - name: 单元测试
+        run: python -m unittest discover -s tests -v
+
+      - name: 典型任务回归评测
+        run: python eval/run_eval.py
+
+      - name: 冒烟测试 HTTP 服务
+        run: |
+          python run.py --port 8010 &
+          SERVER_PID=$!
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8010/api/health > /dev/null; then break; fi
+            sleep 0.4
+          done
+          curl -sf http://127.0.0.1:8010/api/health
+          curl -sf http://127.0.0.1:8010/api/catalog | head -c 200
+          curl -sf -X POST http://127.0.0.1:8010/api/execute \
+            -H 'Content-Type: application/json' \
+            -d '{"experiment":"soil_erosion_rusle","mode":"run","params":{"vegetation_cover_pct":40}}' \
+            | head -c 300
+          kill $SERVER_PID
