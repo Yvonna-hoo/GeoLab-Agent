@@ -1,0 +1,12 @@
+{"id": "H01", "text": "植被覆盖率提高之后，土壤流失量是线性下降的吗？", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-decrease:soil_loss_t_ha_yr"], "note": "换说法问关系曲线，规则版靠「线性」能中，属于对照"}
+{"id": "H02", "text": "弯道的内侧和外侧，哪边淤哪边冲？", "experiment": "river_bend_erosion", "intent": "run", "checks": ["headline:凹岸"], "note": "口语化问部位，对照组"}
+{"id": "H03", "text": "同样一块坡，修了梯田比不修能少流失多少土？", "experiment": "soil_erosion_rusle", "intent": "compare", "checks": ["delta-negative"], "note": "「比…能少多少」：规则版关键词表里没有这种句式"}
+{"id": "H04", "text": "覆盖度和坡长，哪个对流失量更关键？", "experiment": "soil_erosion_rusle", "intent": "analyze", "checks": ["ranked"], "note": "「更关键」而不是「影响最大」：规则版会误判成 compare"}
+{"id": "H05", "text": "河湾转得更急一些，冲刷会加重吗？", "experiment": "river_bend_erosion", "intent": "sweep", "checks": ["trend-decrease:stress_exceed_ratio"], "note": "「转得更急」隐含扫半径：规则版没有对应触发词"}
+{"id": "H06", "text": "降雨多的年份，坡地流失量会差多少？", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-increase:soil_loss_t_ha_yr"], "note": "隐含扫降雨侵蚀力，句式口语"}
+{"id": "H07", "text": "坡越陡越容易流失吗？", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-increase:soil_loss_t_ha_yr"], "note": "「越…越」，对照组"}
+{"id": "H08", "text": "坡面冲下来的土，最后堆在河道的什么位置？", "experiment": null, "intent": "cross_module", "checks": ["no-exec"], "note": "跨尺度因果链，但没有任何「联系/搬运」这类字眼"}
+{"id": "H09", "text": "把覆盖度写成 150% 会怎么样？", "experiment": "soil_erosion_rusle", "intent": "run", "checks": ["exec-error", "precheck"], "note": "参数抽取用「写成」而不是「设成」；必须抽出来并被工具拒绝"}
+{"id": "H10", "text": "今天天气怎么样？", "experiment": null, "intent": null, "checks": ["route-refused"], "note": "闲聊，必须拒绝，对照组"}
+{"id": "H11", "text": "如果把这面坡的树砍了，流失量会翻几倍？", "experiment": "soil_erosion_rusle", "intent": "sweep", "checks": ["trend-decrease:soil_loss_t_ha_yr"], "note": "「砍树」隐含降低覆盖度；「翻几倍」不是标准问法"}
+{"id": "H12", "text": "河道从直变弯，凹岸的泥沙是被冲走还是堆起来？", "experiment": "river_bend_erosion", "intent": "run", "checks": ["headline:凹岸"], "note": "对照组：两种引擎都应判 run"}

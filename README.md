@@ -62,20 +62,43 @@ python run.py --host 0.0.0.0 --port 8080   # 局域网内让别人也能看你�
 python -m unittest discover -s tests       # 跑测试（61 项）
 ```
 
-### 配置模型服务（可选）
+### 接入大模型（可选）
 
-不配置也能跑完整流程（规则式路由兜底）。要接入大模型时：
+不配置也能跑完整流程——规则式路由兜底。要接入大模型：
 
 ```bash
 copy .env.example .env        # macOS/Linux: cp .env.example .env
 # 编辑 .env，填入 GEO_API_BASE / GEO_API_KEY / GEO_MODEL
-python scripts/check_key.py
+python scripts/check_key.py   # 验证 key，只打印状态与用量，不打印完整 key
 ```
 
-`.env` 已在 `.gitignore` 中，不会进入仓库。`check_key.py` 只报告状态与用量，不打印完整 key。
+`.env` 已在 `.gitignore` 中，不会进入仓库。
 
-任何 OpenAI 兼容服务都能直接换：DeepSeek、阿里云百炼、联通元景、上海智慧教育平台，
-只改这三个环境变量，代码不动。
+任何 OpenAI 兼容服务都能直接换：DeepSeek、阿里云百炼、联通元景、上海智慧教育平台——
+只改三个环境变量，代码一行不动。
+
+**三种引擎策略**（`POST /api/agent/route` 的 `engine` 字段）：
+
+| 取值 | 行为 |
+|---|---|
+| `auto`（默认） | 配了 key 就走大模型；调用失败时**静默回退**规则引擎 |
+| `llm` | 强制走大模型，失败才回退 |
+| `rule` | 强制走规则引擎，用于基线与离线演示 |
+
+返回里的 `engine` 字段会如实说明这次是谁答的，界面右上角也会显示当前模式。
+回退不是隐藏失败，而是让「能答」优先于「答得漂亮」。
+
+两个引擎的实测对比见 **[docs/ENGINE_COMPARISON.md](docs/ENGINE_COMPARISON.md)**：
+
+| 任务集 | 规则引擎 | 大模型 |
+|---|---|---|
+| A · 设计同源（18 条，规则引擎据此调优） | 100% | 100% |
+| B · 未见过的新问法（12 条） | **33.3%** | **91.7%** |
+
+A 集的 100% 是过拟合的必然结果，B 集才是真实能力。所以两者不是二选一，
+而是**规则兜底 + 模型泛化**——这也是 `auto` 成为默认策略的原因。
+
+![大模型路由结果](docs/screenshots/result-llm.png)
 
 ---
 
@@ -180,12 +203,15 @@ GeoLab-Agent/
 │   │   ├── soil_erosion.py     RUSLE 水土流失
 │   │   └── river_bend.py       弯道侵蚀沉积
 │   └── agent/
-│       └── router.py           自然语言 → 结构化实验方案
+│       ├── router.py           规则路由（关键词 + 参数抽取 + 意图正则）
+│       ├── llm.py              OpenAI 兼容客户端（标准库实现）
+│       └── llm_router.py       大模型路由 + 校验修复 + 失败回退
 ├── web/                        前端（无框架、无 CDN）
 ├── skills/                     EduWork / DSH 技能定义
+├── scripts/check_key.py        验证模型服务配置
 ├── tests/                      61 项单元测试
-├── eval/                       典型任务回归集与评测脚本
-└── docs/                       架构、接口、模型假设
+├── eval/                       回归集、未见过的新问法集、引擎对比脚本
+└── docs/                       架构、接口、模型假设、引擎对比
 ```
 
 ---
@@ -209,11 +235,14 @@ EduWork 构建在 DeepSeek Harness 之上，其「技能」就是 `SKILL.md` 目
 ## 测试与评测
 
 ```bash
-python -m unittest discover -s tests    # 61 项，覆盖物理一致性、校验、服务层与路由
-python eval/run_eval.py                 # 典型任务回归集
+python -m unittest discover -s tests        # 61 项，覆盖物理一致性、校验、服务层与路由
+python eval/run_eval.py                     # 典型任务回归集（18 条）
+python eval/compare_engines.py              # 规则 vs 大模型，两个任务集（30 条）
 ```
 
 测试不只验证「函数能跑」，而是验证**关系方向**：覆盖度上升流失量必须下降、凹岸剪应力必须大于凸岸、`τ` 必须与 `v²` 成正比、断面平均流速必须守恒。任何一条方向反了，教学结论就错了。
+
+`compare_engines.py` 会同时报告**设计同源集**和**未见过的新问法集**。只报前者是自欺欺人——那批问题本来就是照着规则引擎的关键词设计的。
 
 ---
 
@@ -225,7 +254,7 @@ python eval/run_eval.py                 # 典型任务回归集
 - [x] 前端界面与离线图表
 - [x] 技能定义（SKILL.md）
 - [x] 单元测试与任务回归集
-- [ ] 接入真实大模型（意图识别替换规则路由，保留规则路由作基线）
+- [x] 接入真实大模型（规则路由保留为兜底与基线）——见 [引擎对比](docs/ENGINE_COMPARISON.md)
 - [ ] EduWork 原生插件（npm 包 `@geolab/dsh-geolab`）
 - [ ] 对照实验：传统虚拟实验 / 纯聊天模型 / 本智能体 三组教学效果对比
 - [ ] 地形 2.5D 剖面与等值线增强

@@ -100,17 +100,20 @@
     var results = await Promise.all([
       api("/api/health"), api("/api/catalog"), api("/api/tasks"), api("/api/presets"),
     ]);
+    var health = results[0];
     state.catalog = results[1].experiments || [];
     state.tasks = results[2].tasks || [];
     state.presets = { sweep: results[3].sweep || {}, compare: results[3].compare || {} };
+    state.llm = (health && health.llm) || { configured: false };
 
     renderCards();
     bindComposer();
+    renderEngineBadge();
 
     $("homeLink").addEventListener("click", function () {
       $("result").classList.add("hidden");
       $("landing").classList.remove("hidden");
-      $("barNote").textContent = "地理科学虚拟实验智能体";
+      renderEngineBadge();
       $("taskInput").value = "";
       syncSend();
       $("scroll").scrollTop = 0;
@@ -148,6 +151,23 @@
         ask(t.text);
       });
     });
+  }
+
+  function renderEngineBadge() {
+    var el = $("barNote");
+    if (!el) return;
+    if (state.llm && state.llm.configured) {
+      el.textContent = "大模型已接入 · " + (state.llm.model || "") + " · 失败自动回退规则引擎";
+    } else {
+      el.textContent = "规则引擎 · 未配置模型服务（见 .env）";
+    }
+  }
+
+  function engineLabel(e) {
+    if (!e) return "";
+    if (e.indexOf("llm") === 0) return "大模型";
+    if (e.indexOf("rule") >= 0) return e.indexOf("回退") >= 0 || e.indexOf("失败") >= 0 ? "规则（回退）" : "规则";
+    return e;
   }
 
   /* ---------------- 输入框 ---------------- */
@@ -290,6 +310,7 @@
     var chips = '<div class="chips">' +
       '<span class="chip accent">' + esc(r.experiment ? r.experiment.title : exp.title) + "</span>" +
       '<span class="chip"><b>' + esc(modeLabel(state.mode)) + "</b></span>" +
+      (plan.engine ? '<span class="chip">' + esc(engineLabel(plan.engine)) + "</span>" : "") +
       (plan.confidence ? '<span class="chip">置信度 ' + Math.round(plan.confidence * 100) + "%</span>" : "") +
       (r.trace ? '<span class="chip">' + r.trace.duration_ms + " ms</span>" : "") +
       "</div>";

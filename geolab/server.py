@@ -16,7 +16,8 @@ from typing import Any, Dict
 from urllib.parse import unquote, urlparse
 
 from . import service
-from .agent import router
+from .agent import llm_router, router
+from .agent.llm import load_config
 from .agent.router import COMPARE_PRESETS, DEFAULT_SWEEP_VALUES, TOPIC_SWEEP
 from .registry import catalog
 
@@ -62,7 +63,18 @@ class Handler(BaseHTTPRequestHandler):
         path = posixpath.normpath(unquote(urlparse(self.path).path))
 
         if path == "/api/health":
-            self._json({"ok": True, "service": "geolab-agent", "version": "1.0.0"})
+            cfg = load_config()
+            self._json({
+                "ok": True,
+                "service": "geolab-agent",
+                "version": "1.0.0",
+                # 前端据此显示「当前是大模型还是规则引擎」，避免让人误以为是同一个东西
+                "llm": {
+                    "configured": cfg is not None,
+                    "model": cfg.model if cfg else None,
+                    "base": cfg.base if cfg else None,
+                },
+            })
             return
         if path == "/api/catalog":
             self._json({"ok": True, "experiments": catalog()})
@@ -94,7 +106,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(service.execute(payload))
                 return
             if path == "/api/agent/route":
-                self._json(router.route(str(payload.get("text") or "")))
+                engine = str(payload.get("engine") or "auto")
+                self._json(llm_router.route_with_engine(str(payload.get("text") or ""), engine))
                 return
         except Exception as exc:
             self._json({
